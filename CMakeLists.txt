@@ -11,16 +11,24 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 
 add_executable(beginner_publisher src/beginner_publisher.cpp)
+add_executable(beginner_subscriber src/beginner_subscriber.cpp)
 
 ament_target_dependencies(beginner_publisher rclcpp std_msgs)
+ament_target_dependencies(beginner_subscriber rclcpp std_msgs)
 
 target_include_directories(beginner_publisher PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
+target_include_directories(beginner_subscriber PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
 
 target_compile_features(beginner_publisher PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+target_compile_features(beginner_subscriber PUBLIC c_std_99 cxx_std_17)
 
 install(TARGETS beginner_publisher
+  DESTINATION lib/${PROJECT_NAME})
+install(TARGETS beginner_subscriber
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
