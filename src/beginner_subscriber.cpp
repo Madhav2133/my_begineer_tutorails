@@ -27,9 +27,16 @@ class MinimalSubscriber : public rclcpp::Node {
    * @brief Initializes the subscriber.
    */
   MinimalSubscriber() : rclcpp::Node("beginner_subscriber") {
+    this->declare_parameter<std::string>("node_tag", "default");
+    node_tag_ = this->get_parameter("node_tag").as_string();
+
     subscription_ = this->create_subscription<std_msgs::msg::String>(
         "beginner_publisher", 10,
         std::bind(&MinimalSubscriber::MessageCallback, this, std::placeholders::_1));
+
+    RCLCPP_INFO_STREAM(
+        this->get_logger(),
+        "Subscriber ready with node tag: " << node_tag_);
   }
 
  private:
@@ -39,10 +46,28 @@ class MinimalSubscriber : public rclcpp::Node {
    * @param message Incoming `std_msgs::msg::String` message pointer.
    */
   void MessageCallback(const std_msgs::msg::String::SharedPtr message) const {
-    RCLCPP_INFO(this->get_logger(), "Heard: '%s'", message->data.c_str());
+    if (!message) {
+      RCLCPP_ERROR_STREAM(this->get_logger(), "Received null message pointer.");
+      return;
+    }
+
+    RCLCPP_INFO_STREAM(
+        this->get_logger(),
+        "Heard (" << node_tag_ << "): " << message->data);
+
+    if (message->data.find("Service-triggered") != std::string::npos) {
+      RCLCPP_ERROR_STREAM(
+          this->get_logger(),
+          "Detected service-triggered publication: " << message->data);
+    } else {
+      RCLCPP_DEBUG_STREAM(
+          this->get_logger(),
+          "Standard publication received: " << message->data);
+    }
   }
 
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscription_;  ///< String subscription.
+  std::string node_tag_;  ///< Identifier appended to log output.
 };
 
 /**
