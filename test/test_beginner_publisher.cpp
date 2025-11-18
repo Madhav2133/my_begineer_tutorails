@@ -1,3 +1,14 @@
+/**
+ * @file test_beginner_publisher.cpp
+ * @brief Level-2 integration tests for the beginner_publisher node.
+ *
+ * This test file uses Catch2 to test the MinimalPublisher node functionality,
+ * including topic publishing, service responses, and TF transform broadcasting.
+ *
+ * @author Venkata Madhav Tadavarthi
+ * @date 2025-11-17
+ */
+
 #include <catch_ros2/catch_ros2.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
