@@ -6,17 +6,20 @@
  * It follows the Google C++ Style Guide.
  *
  * @author Venkata Madhav Tadavarthi
- * @date 2025-11-10
+ * @date 2025-11-17
 */
 
 #include <chrono>
+#include <cmath>
 #include <functional>
 #include <memory>
 #include <string>
 
 #include "example_interfaces/srv/set_bool.hpp"
+#include "geometry_msgs/msg/transform_stamped.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "tf2_ros/transform_broadcaster.h"
 
 namespace {
 
@@ -58,6 +61,8 @@ class MinimalPublisher : public rclcpp::Node {
             &MinimalPublisher::HandleToggleMessage, this,
             std::placeholders::_1, std::placeholders::_2));
 
+    tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+
     RCLCPP_INFO_STREAM(
         this->get_logger(),
         "Publisher initialized with period (ms): " << publish_period_.count());
@@ -72,6 +77,27 @@ class MinimalPublisher : public rclcpp::Node {
     message.data = base_message_ + " #" + std::to_string(count_++);
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Publishing message: " << message.data);
     publisher_->publish(message);
+
+    // Broadcast TF transform: /talk frame with parent /world
+    geometry_msgs::msg::TransformStamped transform;
+    transform.header.stamp = this->now();
+    transform.header.frame_id = "world";      ///< Parent frame ID
+    transform.child_frame_id = "talk";        ///< Child frame ID
+
+    // Time-variant transform: rotating and translating
+    const double time = this->now().seconds();
+    transform.transform.translation.x = 1.0 + 0.5 * std::sin(time);  ///< X translation with sinusoidal variation
+    transform.transform.translation.y = 0.5 * std::cos(time);         ///< Y translation with cosine variation
+    transform.transform.translation.z = 0.5;                          ///< Z translation (constant offset)
+
+    // Rotation around Z-axis
+    const double angle = time * 0.5;  ///< Rotation angle (slow rotation: 0.5 rad/s)
+    transform.transform.rotation.x = 0.0;
+    transform.transform.rotation.y = 0.0;
+    transform.transform.rotation.z = std::sin(angle / 2.0);  ///< Z component of quaternion
+    transform.transform.rotation.w = std::cos(angle / 2.0);  ///< W component of quaternion
+
+    tf_broadcaster_->sendTransform(transform);
   }
 
   /**
@@ -98,6 +124,7 @@ class MinimalPublisher : public rclcpp::Node {
   rclcpp::TimerBase::SharedPtr timer_;  ///< Timer responsible for scheduling publishes.
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;  ///< String publisher.
   rclcpp::Service<example_interfaces::srv::SetBool>::SharedPtr service_;  ///< Toggle service.
+  std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;  ///< TF broadcaster for /talk frame.
   std::chrono::milliseconds publish_period_;  ///< Period between publishes.
   std::string base_message_;  ///< Current base message string.
   size_t count_ = 0;  ///< Number of messages published so far.
