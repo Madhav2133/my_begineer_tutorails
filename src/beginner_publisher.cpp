@@ -6,7 +6,7 @@
  * It follows the Google C++ Style Guide.
  *
  * @author Venkata Madhav Tadavarthi
- * @date 2025-11-10
+ * @date 2025-11-17
 */
 
 #include <chrono>
@@ -81,21 +81,21 @@ class MinimalPublisher : public rclcpp::Node {
     // Broadcast TF transform: /talk frame with parent /world
     geometry_msgs::msg::TransformStamped transform;
     transform.header.stamp = this->now();
-    transform.header.frame_id = "world";
-    transform.child_frame_id = "talk";
+    transform.header.frame_id = "world";      ///< Parent frame ID
+    transform.child_frame_id = "talk";        ///< Child frame ID
 
     // Time-variant transform: rotating and translating
     const double time = this->now().seconds();
-    transform.transform.translation.x = 1.0 + 0.5 * std::sin(time);
-    transform.transform.translation.y = 0.5 * std::cos(time);
-    transform.transform.translation.z = 0.5;
+    transform.transform.translation.x = 1.0 + 0.5 * std::sin(time);  ///< X translation with sinusoidal variation
+    transform.transform.translation.y = 0.5 * std::cos(time);         ///< Y translation with cosine variation
+    transform.transform.translation.z = 0.5;                          ///< Z translation (constant offset)
 
     // Rotation around Z-axis
-    const double angle = time * 0.5;  // Slow rotation
+    const double angle = time * 0.5;  ///< Rotation angle (slow rotation: 0.5 rad/s)
     transform.transform.rotation.x = 0.0;
     transform.transform.rotation.y = 0.0;
-    transform.transform.rotation.z = std::sin(angle / 2.0);
-    transform.transform.rotation.w = std::cos(angle / 2.0);
+    transform.transform.rotation.z = std::sin(angle / 2.0);  ///< Z component of quaternion
+    transform.transform.rotation.w = std::cos(angle / 2.0);  ///< W component of quaternion
 
     tf_broadcaster_->sendTransform(transform);
   }
