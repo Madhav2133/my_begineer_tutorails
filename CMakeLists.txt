@@ -38,15 +38,36 @@ install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
-  set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
-  set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
+  # Find Catch2 for integration tests (ROS 2 way)
+  find_package(catch_ros2 REQUIRED)
+  
+  # ---- Build Integration Test Executable ----
+  # Name it integration_test_node to match catch_ros2 discovery pattern
+  add_executable(integration_test_node test/test_beginner_publisher.cpp)
+  
+  target_compile_features(integration_test_node PUBLIC c_std_99 cxx_std_17)
+
+  ament_target_dependencies(integration_test_node
+    rclcpp
+    std_msgs
+    example_interfaces
+    tf2_ros
+    geometry_msgs
+  )
+
+  target_link_libraries(integration_test_node
+    catch_ros2::catch_ros2_with_node_main
+  )
+
+  install(TARGETS integration_test_node
+    DESTINATION lib/${PROJECT_NAME}
+  )
+
+  # Register integration test with launch file using catch_ros2
+  catch_ros2_add_integration_test(PublisherIntegrationTest
+    LAUNCH_FILE test_publisher.launch.py
+  )
+
 endif()
 
 ament_package()
