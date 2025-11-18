@@ -10,11 +10,13 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(example_interfaces REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 add_executable(beginner_publisher src/beginner_publisher.cpp)
 add_executable(beginner_subscriber src/beginner_subscriber.cpp)
 
-ament_target_dependencies(beginner_publisher rclcpp std_msgs example_interfaces)
+ament_target_dependencies(beginner_publisher rclcpp std_msgs example_interfaces tf2_ros geometry_msgs)
 ament_target_dependencies(beginner_subscriber rclcpp std_msgs)
 
 target_include_directories(beginner_publisher PUBLIC
