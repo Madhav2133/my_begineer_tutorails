@@ -29,14 +29,14 @@ def generate_launch_description() -> LaunchDescription:
         package="beginner_tutorials",
         executable="beginner_publisher",
         parameters=[{"publish_period_ms": LaunchConfiguration("publish_period_ms")}],
-        arguments=["--ros-args", "--log-level", "debug"],
+        # arguments=["--ros-args", "--log-level", "debug"],
     )
 
     subscriber_node = Node(
         package="beginner_tutorials",
         executable="beginner_subscriber",
         parameters=[{"node_tag": LaunchConfiguration("subscriber_tag")}],
-        arguments=["--ros-args", "--log-level", "debug"],
+        # arguments=["--ros-args", "--log-level", "debug"],
     )
 
     return LaunchDescription(
